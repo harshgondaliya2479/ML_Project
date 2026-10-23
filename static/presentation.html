@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentation — MovieLens Recommender System (White Academic Theme)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #f1f5f9;
+      --bg-deck: #ffffff;
+      --card-bg: #f8fafc;
+      --navy: #1e3a8a;
+      --accent: #2563eb;
+      --accent-cyan: #0284c7;
+      --accent-gold: #d97706;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.05);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-page);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      overflow-x: hidden;
+    }
+    .top-actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      width: 100%;
+      max-width: 1200px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .top-link {
+      color: var(--navy);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .top-link:hover { text-decoration: underline; }
+    .download-badge {
+      background: linear-gradient(135deg, var(--navy), var(--accent));
+      color: #fff;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.88rem;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      transition: all 0.2s ease;
+    }
+    .download-badge:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+    }
+
+    .deck-container {
+      width: 100%;
+      max-width: 1200px;
+      aspect-ratio: 16 / 9;
+      background: var(--bg-deck);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .slide {
+      flex: 1;
+      padding: 2.5rem 3.5rem;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      animation: fadeIn 0.3s ease;
+      background: #ffffff;
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.99); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .slide-badge {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-transform: uppercase;
+      font-family: 'Outfit', sans-serif;
+    }
+    .slide-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.15rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 0.25rem 0;
+    }
+    .slide-subtitle {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      margin-bottom: 1.25rem;
+    }
+    .slide-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+    .slide-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .slide-bullets li {
+      font-size: 0.96rem;
+      line-height: 1.5;
+      color: var(--text);
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    .slide-bullets li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+    .slide-bullets strong {
+      color: var(--navy);
+    }
+    .slide-media {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem;
+      height: 100%;
+      max-height: 330px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    }
+    .slide-media img {
+      max-width: 100%;
+      max-height: 310px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+
+    /* Institution Header Bar on Title Slide */
+    .bvm-header-bar {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .bvm-header-logo {
+      width: 68px;
+      height: 68px;
+      object-fit: contain;
+    }
+    .bvm-header-text h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      color: var(--navy);
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+    .bvm-header-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Student & Mentor Cards */
+    .meta-cards-row {
+      display: flex;
+      gap: 1.2rem;
+      margin-top: 1.2rem;
+    }
+    .meta-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1.2rem;
+      flex: 1;
+      border-left: 4px solid var(--accent);
+    }
+    .meta-card-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .meta-card-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0.2rem 0;
+    }
+    .meta-card-sub {
+      font-size: 0.82rem;
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
+    /* Introduction Slide Grid & Cards */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.1rem;
+      margin-top: 0.6rem;
+      width: 100%;
+    }
+    .intro-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.05rem 1.25rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      border-top: 4px solid var(--accent);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .intro-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+    .intro-card:nth-child(2) {
+      border-top-color: var(--accent-gold);
+    }
+    .intro-card:nth-child(3) {
+      border-top-color: var(--navy);
+    }
+    .intro-card:nth-child(4) {
+      border-top-color: #0284c7;
+    }
+    .intro-card-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 0.35rem;
+    }
+    .intro-card h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.4rem;
+    }
+    .intro-card p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .intro-card ul {
+      margin-top: 0.4rem;
+      padding-left: 1.1rem;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .intro-card ul li {
+      margin-bottom: 0.25rem;
+    }
+    .intro-card ul li strong {
+      color: var(--text);
+    }
+
+    /* Thank You Page Styling (Clean White) */
+    .thankyou-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      gap: 1.25rem;
+    }
+    .thankyou-logo {
+      width: 95px;
+      height: 95px;
+      object-fit: contain;
+    }
+    .thankyou-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: var(--navy);
+    }
+    .thankyou-proj-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .thankyou-inst {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      max-width: 650px;
+    }
+    .thankyou-cards {
+      display: flex;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 780px;
+      margin-top: 0.5rem;
+    }
+    .thankyou-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      flex: 1;
+      text-align: left;
+      border-top: 4px solid var(--navy);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    /* Controls Footer */
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+    }
+    .nav-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--navy);
+      padding: 0.55rem 1.4rem;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--navy);
+      color: #ffffff;
+      border-color: var(--navy);
+    }
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .slide-indicators {
+      display: flex;
+      gap: 0.6rem;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-actions">
+    <a href="/" class="top-link">← Back to CineMind Dashboard</a>
+    <a href="/MovieLens_Recommender_System.pptx" download class="download-badge">⬇ Download .PPTX (White Academic Theme)</a>
+  </div>
+
+  <div class="deck-container">
+    <!-- SLIDE 1: TITLE SLIDE (WHITE THEME) -->
+    <div class="slide active">
+      <div class="bvm-header-bar">
+        <img src="/Images/bvm_logo.png" alt="BVM Logo" class="bvm-header-logo">
+        <div class="bvm-header-text">
+          <h3>BIRLA VISHVAKARMA MAHAVIDYALAYA (ENGINEERING COLLEGE)</h3>
+          <p>Department of Information Technology • An Autonomous Institution • Vallabh Vidyanagar</p>
+        </div>
+      </div>
+
+      <div class="slide-body">
+        <div>
+          <div class="slide-badge">Final Project Presentation</div>
+          <h1 class="slide-title">Movie Recommender System on MovieLens Dataset</h1>
+          <p class="slide-subtitle">Multi-Paradigm Recommender using Knowledge-Based, KNN, SVD & Softmax DNN</p>
+
+          <div class="meta-cards-row">
+            <div class="meta-card">
+              <div class="meta-card-label">Presented By</div>
+              <div class="meta-card-name">Harsh Gondaliya</div>
+              <div class="meta-card-sub">ID No: 23IT405</div>
+            </div>
+            <div class="meta-card">
+              <div class="meta-card-label">Project Mentor</div>
+              <div class="meta-card-name">Prof. Dhruvin R. Kotak</div>
+              <div class="meta-card-sub">Assistant Professor, IT Dept</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-media">
+          <img src="/Images/netflix-recommendation-s.jpeg" alt="Movie Recommender Overview">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: INTRODUCTION -->
+    <div class="slide">
+      <div>
+        <div class="slide-badge">Slide 2 • Introduction &amp; Project Overview</div>
+        <h1 class="slide-title">Introduction to Recommender Systems</h1>
+        <p class="slide-subtitle">The algorithmic backbone of personalized digital media and content discovery</p>
+      </div>
+      <div class="intro-grid">
+        <div class="intro-card">
+          <div class="intro-card-tag" style="color: var(--accent);">Definition &amp; Essence</div>
+          <h4>What is a Recommender System?</h4>
+          <p>Information filtering algorithms that predict user ratings, preferences, and affinities for unrated items.</p>
+          <ul>
+            <li><strong>Personalized Discovery:</strong> Transforms vast libraries into tailored candidate sets matching individual taste profiles.</li>
+            <li><strong>Industry Driver:</strong> Powers &gt;80% of watched content on Netflix and &gt;70% of YouTube video streams.</li>
+          </ul>
+        </div>
+
+        <div class="intro-card">
+          <div class="intro-card-tag" style="color: var(--accent-gold);">Motivation &amp; Relevance</div>
+          <h4>Why Recommenders Matter</h4>
+          <p>Overcomes the modern "Paradox of Choice" where users face thousands of titles and experience decision paralysis.</p>
+          <ul>
+            <li><strong>Surfacing the Long Tail:</strong> Recommends hidden gems and niche titles beyond standard blockbusters.</li>
+            <li><strong>Business Value:</strong> Enhances user retention, average session duration, and catalog discoverability.</li>
+          </ul>
+        </div>
+
+        <div class="intro-card">
+          <div class="intro-card-tag" style="color: var(--navy);">Multi-Paradigm Approach</div>
+          <h4>Core Methodologies Implemented</h4>
+          <ul>
+            <li><strong>Knowledge-Based:</strong> Heuristic genre, popularity, and rating filtering for cold-start visitors.</li>
+            <li><strong>Collaborative KNN:</strong> Memory-based item &amp; user similarity via Cosine distance.</li>
+            <li><strong>Matrix Factorization (SVD):</strong> 50 latent taste dimensions resolving 93% matrix sparsity.</li>
+            <li><strong>Deep Learning (DNN):</strong> User &amp; item embedding layers with Softmax multiclass outputs.</li>
+          </ul>
+        </div>
+
+        <div class="intro-card">
+          <div class="intro-card-tag" style="color: #0284c7;">Project Deliverables</div>
+          <h4>Project Scope &amp; Objectives</h4>
+          <ul>
+            <li><strong>Benchmark Evaluation:</strong> Trained and benchmarked on MovieLens 100K (100K ratings, 943 users, 1.6K movies).</li>
+            <li><strong>Unified Web Application:</strong> Modern real-time UI with instant model comparisons and fuzzy search.</li>
+            <li><strong>Interactive CLI:</strong> Standalone terminal command-line tool for live algorithmic testing.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: PROBLEM STATEMENT -->
+    <div class="slide">
+      <div>
+        <div class="slide-badge">Slide 3 • Problem Statement</div>
+        <h1 class="slide-title">Challenges in Movie Recommendations</h1>
+        <p class="slide-subtitle">Why naive recommendations fail in modern entertainment platforms</p>
+      </div>
+      <div class="slide-body">
+        <ul class="slide-bullets">
+          <li><strong>Information Overload:</strong> Users struggle to pick from thousands of available movie choices.</li>
+          <li><strong>The Cold-Start Dilemma:</strong> Brand-new users have zero rating history, breaking pure collaborative filtering.</li>
+          <li><strong>Extreme Data Sparsity:</strong> Over 93% of user-movie ratings are empty (unobserved).</li>
+          <li><strong>Popularity Bias (The Long Tail):</strong> Systems often favor blockbusters, neglecting niche, high-satisfaction movies in the long tail.</li>
+        </ul>
+        <div class="slide-media">
+          <img src="/Images/long-tail.png" alt="The Long Tail">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: DATASET OVERVIEW -->
+    <div class="slide">
+      <div>
+        <div class="slide-badge">Slide 4 • Dataset Overview</div>
+        <h1 class="slide-title">The MovieLens 100K Dataset</h1>
+        <p class="slide-subtitle">Industry benchmark dataset from GroupLens Research Project</p>
+      </div>
+      <div class="slide-body">
+        <ul class="slide-bullets">
+          <li><strong>Dataset Scale:</strong> 100,000 ratings (1 to 5 stars) from 943 users on 1,682 movies.</li>
+          <li><strong>Quality Requirement:</strong> Every single user has rated at least 20 movies.</li>
+          <li><strong>Metadata:</strong> 19 genre tags (Action, Sci-Fi, Drama, etc.), titles, release dates, and user demographic data.</li>
+          <li><strong>Rating Distribution:</strong> Most users award 4-star ratings, followed by 3-star and 5-star ratings.</li>
+        </ul>
+        <div class="slide-media">
+          <img src="/Images/bar-plot.PNG" alt="Rating Frequency Bar Plot">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: RECOMMENDATION CONCEPTS -->
+    <div class="slide">
+      <div>
+        <div class="slide-badge">Slide 5 • Recommendation Concepts</div>
+        <h1 class="slide-title">Content-Based vs. Collaborative Filtering</h1>
+        <p class="slide-subtitle">Two foundational pillars of modern recommendation engines</p>
+      </div>
+      <div class="slide-body">
+        <ul class="slide-bullets">
+          <li><strong>Content-Based Filtering:</strong> Matches discrete item characteristics (genres, keywords, directors) to recommended titles.</li>
+          <li><strong>Collaborative Filtering:</strong> Uses collective community behavior. Assumes users who agreed in the past will agree in the future.</li>
+          <li><strong>Item-Based:</strong> Calculates similarity between items based on user rating patterns.</li>
+          <li><strong>User-Based:</strong> Clusters like-minded users into neighborhoods to share personalized suggestions.</li>
+        </ul>
+        <div class="slide-media">
+          <img src="/Images/coll-cont-pic.png" alt="Collaborative vs Content Filtering">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: MODELS 1 & 2 -->
+    <div class="slide">
+      <div>
+        <div class="slide-badge">Slide 6 • Models 1 &amp; 2</div>
+        <h1 class="slide-title">Knowledge-Based &amp; K-Nearest Neighbors (KNN)</h1>
+        <p class="slide-subtitle">Instant cold-start resolution and memory-based collaborative filtering</p>
+      </div>
+      <div class="slide-body">
+        <ul class="slide-bullets">
+          <li><strong>Knowledge-Based Filtering:</strong> Ranks top-rated popular movies by genre. Completely solves the Cold-Start challenge for anonymous visitors.</li>
+          <li><strong>KNN Item-Based Recommender:</strong> Builds a sparse matrix and uses Cosine Distance to find closest companion films.</li>
+          <li><strong>KNN User-Based Recommender:</strong> Finds top $K$ peer users and weights candidate movies by inverse peer distance.</li>
+          <li><strong>Dynamic Movie Suggestor:</strong> Substring &amp; typo-tolerant matching allows users to find films without exact title spellings.</li>
+        </ul>
+        <div class="slide-media">
+          <img src="/Images/genre-bar-plot.PNG" alt="Genre Bar Plot">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: MODELS 3 & 4 -->
+    <div class="slide">
+      <div>
+        <div class="slide-badge">Slide 7 • Models 3 &amp; 4</div>
+        <h1 class="slide-title">SVD Matrix Factorization &amp; Deep Neural Networks</h1>
+        <p class="slide-subtitle">Latent factor discovery and non-linear deep learning</p>
+      </div>
+      <div class="slide-body">
+        <ul class="slide-bullets">
+          <li><strong>Singular Value Decomposition (SVD):</strong> Factors utility matrix $A$ into $U \Sigma V^T$ with 50 latent dimensions, uncovering underlying movie themes and user preferences.</li>
+          <li><strong>Overcoming Sparsity:</strong> Reconstructs missing matrix values to predict unobserved ratings across the entire catalog.</li>
+          <li><strong>Softmax Deep Neural Network (DNN):</strong> Uses learned user &amp; item Embedding layers + Dense layers with Dropout.</li>
+          <li><strong>Softmax Classification:</strong> Predicts probability distribution across rating categories for unseen movies.</li>
+        </ul>
+        <div class="slide-media">
+          <img src="/Images/pie.PNG" alt="Dataset Rating Distribution">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: APPLICATION & RESULTS -->
+    <div class="slide">
+      <div>
+        <div class="slide-badge">Slide 8 • Application &amp; Results</div>
+        <h1 class="slide-title">Interactive Dashboard &amp; Key Takeaways</h1>
+        <p class="slide-subtitle">Project evaluation, summary of findings, and production architecture</p>
+      </div>
+      <div class="slide-body">
+        <ul class="slide-bullets">
+          <li><strong>Real-Time Web Application:</strong> Complete UI with 6 interactive tabs, autocomplete search, and instant model inference in &lt;0.5s.</li>
+          <li><strong>Hybrid Superiority:</strong> Knowledge-based handles new users, KNN provides immediate similarity, SVD solves sparsity, and DNN captures non-linear relationships.</li>
+          <li><strong>Addressing Long-Tail:</strong> Matrix factorization successfully uncovers high-quality, lesser-known movie recommendations.</li>
+          <li><strong>Scalability:</strong> Sparse CSR matrices and SVD projection reduce memory footprint while maintaining high recommendation fidelity.</li>
+        </ul>
+        <div class="slide-media">
+          <img src="/Images/netflix-recommendation-s.jpeg" alt="Conclusion">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: DEDICATED THANK YOU SLIDE (WHITE THEME) -->
+    <div class="slide">
+      <div class="thankyou-layout">
+        <img src="/Images/bvm_logo.png" alt="BVM Logo" class="thankyou-logo">
+        <h1 class="thankyou-title">Thank You!</h1>
+        <h2 class="thankyou-proj-title">Movie Recommender System on MovieLens Dataset</h2>
+        <p class="thankyou-inst">Birla Vishvakarma Mahavidyalaya (BVM Engineering College) • An Autonomous Institution<br>Department of Information Technology • Vallabh Vidyanagar</p>
+
+        <div class="thankyou-cards">
+          <div class="thankyou-card">
+            <div class="meta-card-label">Presented By</div>
+            <div class="meta-card-name" style="font-size: 1.25rem;">Harsh Gondaliya</div>
+            <div class="meta-card-sub" style="font-size: 0.95rem;">ID No: 23IT405</div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;">B.Tech Information Technology<br>BVM Engineering College</p>
+          </div>
+
+          <div class="thankyou-card">
+            <div class="meta-card-label">Under the Mentorship of</div>
+            <div class="meta-card-name" style="font-size: 1.25rem;">Prof. Dhruvin R. Kotak</div>
+            <div class="meta-card-sub" style="font-size: 0.95rem;">Assistant Professor</div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;">Information Technology Department<br>BVM Engineering College</p>
+          </div>
+        </div>
+
+        <p style="color: var(--accent); font-weight: 700; font-size: 1rem; margin-top: 0.5rem;">Questions & Discussion Welcome!</p>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="deck-controls">
+      <button class="nav-btn" id="prevBtn" onclick="prevSlide()">← Previous</button>
+      <div class="slide-indicators" id="dotsContainer"></div>
+      <button class="nav-btn" id="nextBtn" onclick="nextSlide()">Next →</button>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const dotsContainer = document.getElementById('dotsContainer');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    }
+
+    function updateDeck() {
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === currentSlide));
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((d, idx) => d.classList.toggle('active', idx === currentSlide));
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateDeck();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateDeck();
+      }
+    }
+
+    function goToSlide(n) {
+      currentSlide = n;
+      updateDeck();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    updateDeck();
+  </script>
+</body>
+</html>

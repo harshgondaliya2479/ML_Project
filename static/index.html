@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineMind AI — MovieLens Recommender System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">CineMind <span>AI</span></h1>
+          <p class="brand-subtitle">MovieLens 100K Multi-Paradigm Recommender</p>
+        </div>
+      </div>
+
+      <!-- Quick Stats Ticker -->
+      <div class="stats-ticker" id="statsTicker">
+        <div class="stat-badge">
+          <span class="stat-val" id="statRatings">100,000</span>
+          <span class="stat-lbl">Ratings</span>
+        </div>
+        <div class="stat-badge">
+          <span class="stat-val" id="statUsers">943</span>
+          <span class="stat-lbl">Users</span>
+        </div>
+        <div class="stat-badge">
+          <span class="stat-val" id="statMovies">1,682</span>
+          <span class="stat-lbl">Movies</span>
+        </div>
+        <div class="stat-badge">
+          <span class="stat-val" id="statGenres">19</span>
+          <span class="stat-lbl">Genres</span>
+        </div>
+        <a href="presentation.html" class="btn btn-secondary btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0 1rem; border-radius:8px;">
+          <span>📊</span>
+          <span>Presentation Deck</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="knowledge">
+        <span class="tab-icon">🌟</span>
+        <span>Knowledge Discovery</span>
+        <span class="tab-badge">Cold Start</span>
+      </button>
+      <button class="nav-tab" data-tab="knn-movie">
+        <span class="tab-icon">🎬</span>
+        <span>Movie Similarity</span>
+        <span class="tab-badge">KNN Item-Item</span>
+      </button>
+      <button class="nav-tab" data-tab="knn-user">
+        <span class="tab-icon">👤</span>
+        <span>User Personalized</span>
+        <span class="tab-badge">KNN User-User</span>
+      </button>
+      <button class="nav-tab" data-tab="svd-movie">
+        <span class="tab-icon">🧬</span>
+        <span>Matrix Factorization</span>
+        <span class="tab-badge">SVD Latent</span>
+      </button>
+      <button class="nav-tab" data-tab="comparison">
+        <span class="tab-icon">⚖️</span>
+        <span>Model Comparison</span>
+        <span class="tab-badge">KNN vs SVD</span>
+      </button>
+      <button class="nav-tab" data-tab="dnn-user">
+        <span class="tab-icon">🧠</span>
+        <span>Neural Scoring</span>
+        <span class="tab-badge">Softmax DNN</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: KNOWLEDGE-BASED -->
+    <section class="tab-panel active" id="tab-knowledge">
+      <div class="section-intro">
+        <div class="intro-text">
+          <h2>Knowledge-Based & Genre Recommendations</h2>
+          <p>Solves the <strong>Cold-Start Problem</strong> for new users with no rating history. Explores top-rated, most popular, and genre-curated recommendations based on statistical ranking thresholds.</p>
+        </div>
+        <div class="genre-selector-wrapper">
+          <label for="genreSelect">Filter by Genre:</label>
+          <select id="genreSelect" class="custom-select">
+            <option value="All">All Genres</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="knowledge-grid">
+        <div class="panel-card">
+          <div class="card-header">
+            <div class="badge badge-accent">Top Rated & Popular</div>
+            <p class="card-subtext" id="criteriaText">High ratings with substantial viewership</p>
+          </div>
+          <div class="movies-list" id="knowledgeTopPopular">
+            <div class="skeleton-loader">Loading recommendations...</div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="card-header">
+            <div class="badge badge-purple">Most Watched</div>
+            <p class="card-subtext">Highest number of ratings received</p>
+          </div>
+          <div class="movies-list" id="knowledgeMostPopular">
+            <div class="skeleton-loader">Loading recommendations...</div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="card-header">
+            <div class="badge badge-cyan">Highest Average Rating</div>
+            <p class="card-subtext">Critically acclaimed films (min 20 viewers)</p>
+          </div>
+          <div class="movies-list" id="knowledgeTopRated">
+            <div class="skeleton-loader">Loading recommendations...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ITEM-BASED KNN -->
+    <section class="tab-panel" id="tab-knn-movie">
+      <div class="section-intro">
+        <div class="intro-text">
+          <h2>Item-Based Collaborative Filtering (KNN)</h2>
+          <p>Finds films with similar user rating profiles using <strong>Cosine Similarity</strong> on the sparse movie-user interaction matrix. Includes real-time typo tolerance.</p>
+        </div>
+      </div>
+
+      <div class="search-box-card">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="knnMovieInput" class="search-input" placeholder="Type a movie name (e.g., Star Wars, Toy Story, Pulp Fiction)..." autocomplete="off" value="Star Wars (1977)">
+          <button class="btn btn-primary" id="btnKnnMovieSearch">Find Similar</button>
+        </div>
+        <div class="autocomplete-dropdown" id="knnMovieSuggestions"></div>
+
+        <div class="quick-chips">
+          <span class="chip-label">Try:</span>
+          <button class="chip" data-movie="Star Wars (1977)">Star Wars (1977)</button>
+          <button class="chip" data-movie="Toy Story (1995)">Toy Story (1995)</button>
+          <button class="chip" data-movie="Fargo (1996)">Fargo (1996)</button>
+          <button class="chip" data-movie="Godfather, The (1972)">Godfather (1972)</button>
+          <button class="chip" data-movie="101 Dalmatians (1996)">101 Dalmatians (1996)</button>
+        </div>
+      </div>
+
+      <div class="results-container">
+        <div class="results-header">
+          <h3 id="knnMovieResultTitle">Similar Movies to: <span class="highlight">Star Wars (1977)</span></h3>
+        </div>
+        <div class="movie-cards-grid" id="knnMovieResults"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: USER-BASED KNN -->
+    <section class="tab-panel" id="tab-knn-user">
+      <div class="section-intro">
+        <div class="intro-text">
+          <h2>User-Based Collaborative Filtering (KNN)</h2>
+          <p>Finds peer users with matching taste profiles, excludes films already seen by the target user, and calculates <strong>distance-weighted rating predictions</strong>.</p>
+        </div>
+      </div>
+
+      <div class="user-config-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="knnUserId">Select User ID (1 – 943):</label>
+            <div class="input-stepper">
+              <input type="number" id="knnUserId" min="1" max="943" value="307" class="custom-input">
+              <button class="btn btn-secondary btn-sm" id="btnRandomUser">🎲 Random User</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="knnSimilarCount">Similar Peers ($K$):</label>
+            <input type="number" id="knnSimilarCount" min="3" max="50" value="15" class="custom-input">
+          </div>
+          <div class="form-group">
+            <label for="knnMovieCount">Recommendations Count:</label>
+            <input type="number" id="knnMovieCount" min="5" max="30" value="12" class="custom-input">
+          </div>
+          <div class="form-group btn-align">
+            <button class="btn btn-primary" id="btnKnnUserGenerate">Generate Recommendations</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-column-layout">
+        <!-- User History & Peers -->
+        <div class="user-profile-panel">
+          <div class="panel-card">
+            <div class="card-header">
+              <div class="badge badge-purple">User Watch History</div>
+              <p class="card-subtext">Highest rated movies already watched by this user</p>
+            </div>
+            <div class="history-list" id="userHistoryList"></div>
+          </div>
+
+          <div class="panel-card mt-4">
+            <div class="card-header">
+              <div class="badge badge-cyan">Nearest Peer Users</div>
+              <p class="card-subtext">Closest users in rating vector space</p>
+            </div>
+            <div class="peer-chips" id="similarPeersList"></div>
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations-panel">
+          <div class="panel-card">
+            <div class="card-header">
+              <div class="badge badge-accent">Recommended For You</div>
+              <p class="card-subtext">Aggregated & distance-weighted from similar peers</p>
+            </div>
+            <div class="movie-cards-grid" id="knnUserResults"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: SVD MATRIX FACTORIZATION -->
+    <section class="tab-panel" id="tab-svd-movie">
+      <div class="section-intro">
+        <div class="intro-text">
+          <h2>Singular Value Decomposition (SVD)</h2>
+          <p>Reduces the dimensional rating space down to $k=50$ <strong>latent factors</strong>, discovering deep thematic, stylistic, and director-level similarities across movies.</p>
+        </div>
+      </div>
+
+      <div class="search-box-card">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="svdMovieInput" class="search-input" placeholder="Type a movie name..." autocomplete="off" value="Star Wars (1977)">
+          <button class="btn btn-primary" id="btnSvdMovieSearch">Compute Latent Matches</button>
+        </div>
+        <div class="autocomplete-dropdown" id="svdMovieSuggestions"></div>
+
+        <div class="quick-chips">
+          <span class="chip-label">Try:</span>
+          <button class="chip" data-svd-movie="Star Wars (1977)">Star Wars (1977)</button>
+          <button class="chip" data-svd-movie="Silence of the Lambs, The (1991)">Silence of the Lambs (1991)</button>
+          <button class="chip" data-svd-movie="Godfather, The (1972)">Godfather, The (1972)</button>
+          <button class="chip" data-svd-movie="Alien (1979)">Alien (1979)</button>
+          <button class="chip" data-svd-movie="101 Dalmatians (1996)">101 Dalmatians (1996)</button>
+        </div>
+      </div>
+
+      <div class="results-container">
+        <div class="results-header">
+          <h3 id="svdMovieResultTitle">Latent Similar Movies for: <span class="highlight">Star Wars (1977)</span></h3>
+        </div>
+        <div class="movie-cards-grid" id="svdMovieResults"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: SIDE-BY-SIDE COMPARISON (KNN VS SVD) -->
+    <section class="tab-panel" id="tab-comparison">
+      <div class="section-intro">
+        <div class="intro-text">
+          <h2>Model Comparison: KNN vs SVD</h2>
+          <p>Compare raw user-overlap matching (KNN Cosine) against latent factor projection (SVD). Observe how SVD finds thematic matches while KNN relies on direct co-rating behavior.</p>
+        </div>
+      </div>
+
+      <div class="search-box-card">
+        <div class="search-input-wrapper">
+          <input type="text" id="compareMovieInput" class="search-input" placeholder="Enter movie to compare..." value="Star Wars (1977)">
+          <button class="btn btn-primary" id="btnCompareSearch">Compare Models</button>
+        </div>
+        <div class="autocomplete-dropdown" id="compareSuggestions"></div>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="panel-card">
+          <div class="card-header">
+            <div class="badge badge-cyan">KNN Cosine Similarity</div>
+            <p class="card-subtext">Direct user rating vector overlap</p>
+          </div>
+          <div class="movie-cards-grid simple-grid" id="compareKnnResults"></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="card-header">
+            <div class="badge badge-purple">SVD Latent Space ($k=50$)</div>
+            <p class="card-subtext">Dimensionality reduced matrix factorization</p>
+          </div>
+          <div class="movie-cards-grid simple-grid" id="compareSvdResults"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: NEURAL / DNN USER RECOMMENDATIONS -->
+    <section class="tab-panel" id="tab-dnn-user">
+      <div class="section-intro">
+        <div class="intro-text">
+          <h2>Softmax Deep Neural Network & Latent Reconstruction</h2>
+          <p>Computes predicted user rating distributions across unseen movies using learned embeddings and latent factorization, surfacing films with maximum predicted satisfaction.</p>
+        </div>
+      </div>
+
+      <div class="user-config-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dnnUserId">User ID (1 – 943):</label>
+            <input type="number" id="dnnUserId" min="1" max="943" value="307" class="custom-input">
+          </div>
+          <div class="form-group">
+            <label for="dnnMovieCount">Number of Recommendations:</label>
+            <input type="number" id="dnnMovieCount" min="5" max="30" value="12" class="custom-input">
+          </div>
+          <div class="form-group btn-align">
+            <button class="btn btn-primary" id="btnDnnUserGenerate">Predict Highest Rated Unseen</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-container">
+        <div class="results-header">
+          <h3 id="dnnUserResultTitle">Predicted Movies for User <span class="highlight">307</span></h3>
+        </div>
+        <div class="movie-cards-grid" id="dnnUserResults"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>MovieLens 100K Recommender System • Built with Python, NumPy, Pandas, Scikit-Learn, SVD & Glassmorphism UI</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
